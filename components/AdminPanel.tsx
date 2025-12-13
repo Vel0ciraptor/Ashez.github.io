@@ -1,5 +1,5 @@
 import React, { useState, useRef, useLayoutEffect } from 'react';
-import { Plus, Trash2, Image as ImageIcon, X, Upload, Lock, Unlock, Pencil, RotateCcw, Save, Layout, Package } from 'lucide-react';
+import { Plus, Trash2, Image as ImageIcon, X, Upload, Lock, Unlock, Pencil, RotateCcw, Save, Layout, Package, Link as LinkIcon } from 'lucide-react';
 import { Product, SiteImages } from '../types';
 import gsap from 'gsap';
 
@@ -29,6 +29,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ products, setProducts, siteImag
     description: '',
     images: []
   });
+  const [imageUrlInput, setImageUrlInput] = useState(''); // State for manual URL entry
   const [hasDiscount, setHasDiscount] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -80,6 +81,20 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ products, setProducts, siteImag
     }
   };
 
+  const handleSiteImageUrlChange = (
+    value: string, 
+    section: keyof SiteImages, 
+    key: string
+  ) => {
+    setSiteImages(prev => ({
+        ...prev,
+        [section]: {
+            ...prev[section],
+            [key]: value
+        }
+    }));
+  };
+
   // --- Product Handlers ---
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -108,6 +123,16 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ products, setProducts, siteImag
     }
   };
 
+  const addImageUrl = () => {
+      if (imageUrlInput && (newProduct.images?.length || 0) < 3) {
+          setNewProduct(prev => ({
+              ...prev,
+              images: [...(prev.images || []), imageUrlInput]
+          }));
+          setImageUrlInput('');
+      }
+  };
+
   const removeImage = (index: number) => {
     setNewProduct(prev => ({
       ...prev,
@@ -126,7 +151,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ products, setProducts, siteImag
     });
     setHasDiscount(!!product.discountPrice);
     setEditingId(product.id);
-    // Scroll to top to see the form
+    setImageUrlInput('');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -141,6 +166,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ products, setProducts, siteImag
       });
       setHasDiscount(false);
       setEditingId(null);
+      setImageUrlInput('');
       if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
@@ -152,7 +178,6 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ products, setProducts, siteImag
     }
 
     if (editingId) {
-        // Update existing product
         setProducts(prev => prev.map(p => {
             if (p.id === editingId) {
                 return {
@@ -169,7 +194,6 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ products, setProducts, siteImag
         }));
         alert('Producto actualizado correctamente');
     } else {
-        // Create new product
         const productToAdd: Product = {
             id: Date.now().toString(),
             name: newProduct.name!,
@@ -183,7 +207,6 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ products, setProducts, siteImag
         alert('Producto agregado al catálogo correctamente');
     }
     
-    // Reset form
     handleCancelEdit();
   };
 
@@ -367,9 +390,11 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ products, setProducts, siteImag
 
                         <div>
                             <label className="block text-xs font-bold uppercase text-gray-400 mb-1">Imágenes (Máx 3)</label>
-                            <div className="flex gap-2 mb-2">
+                            
+                            {/* Visual Preview */}
+                            <div className="flex gap-2 mb-3">
                                 {newProduct.images?.map((img, index) => (
-                                    <div key={index} className="relative w-16 h-16 rounded-lg overflow-hidden border border-gray-200">
+                                    <div key={index} className="relative w-16 h-16 rounded-lg overflow-hidden border border-gray-200 group">
                                         <img src={img} className="w-full h-full object-cover" alt="preview" />
                                         <button 
                                             type="button"
@@ -380,25 +405,51 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ products, setProducts, siteImag
                                         </button>
                                     </div>
                                 ))}
-                                {(newProduct.images?.length || 0) < 3 && (
-                                    <button 
-                                        type="button"
-                                        onClick={() => fileInputRef.current?.click()}
-                                        className="w-16 h-16 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center text-gray-400 hover:text-primary hover:border-primary transition-colors"
-                                    >
-                                        <Upload size={20} />
-                                    </button>
-                                )}
                             </div>
-                            <input 
-                                type="file" 
-                                ref={fileInputRef}
-                                className="hidden" 
-                                accept="image/*" 
-                                multiple
-                                onChange={handleImageUpload}
-                            />
-                            <p className="text-[10px] text-gray-400">Las imágenes se guardan temporalmente en tu navegador.</p>
+
+                            {/* Controls */}
+                            {(newProduct.images?.length || 0) < 3 && (
+                                <div className="space-y-3">
+                                    <div className="flex gap-2">
+                                        <button 
+                                            type="button"
+                                            onClick={() => fileInputRef.current?.click()}
+                                            className="flex-1 py-2 px-4 border border-dashed border-gray-300 rounded-lg text-gray-500 hover:text-primary hover:border-primary hover:bg-orange-50 transition-colors flex items-center justify-center gap-2 text-sm"
+                                        >
+                                            <Upload size={16} /> Subir Archivo
+                                        </button>
+                                        <input 
+                                            type="file" 
+                                            ref={fileInputRef}
+                                            className="hidden" 
+                                            accept="image/*" 
+                                            multiple
+                                            onChange={handleImageUpload}
+                                        />
+                                    </div>
+                                    
+                                    <div className="flex gap-2">
+                                        <input 
+                                            type="text" 
+                                            value={imageUrlInput}
+                                            onChange={(e) => setImageUrlInput(e.target.value)}
+                                            placeholder="/images/foto.jpg o https://..."
+                                            className="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary"
+                                        />
+                                        <button 
+                                            type="button"
+                                            onClick={addImageUrl}
+                                            disabled={!imageUrlInput}
+                                            className="bg-gray-100 text-gray-600 px-3 rounded-lg hover:bg-secondary hover:text-white transition-colors disabled:opacity-50"
+                                        >
+                                            <Plus size={18} />
+                                        </button>
+                                    </div>
+                                    <p className="text-[10px] text-gray-400">
+                                        Nota: Si usas rutas locales (ej: /images/foto.jpg), asegúrate de que el archivo exista en la carpeta pública.
+                                    </p>
+                                </div>
+                            )}
                         </div>
 
                         <button 
@@ -467,31 +518,60 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ products, setProducts, siteImag
                             <label className="text-xs font-bold uppercase text-gray-400">Imagen Central (Grande)</label>
                             <div className="relative aspect-[3/4] bg-gray-100 rounded-xl overflow-hidden border border-gray-200">
                                 <img src={siteImages.portfolio.main} alt="Main" className="w-full h-full object-cover" />
-                                <label className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 hover:opacity-100 transition-opacity cursor-pointer">
-                                    <Upload className="text-white" size={32} />
+                                <label className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 hover:opacity-100 transition-opacity cursor-pointer group">
+                                    <div className="bg-black/50 p-3 rounded-full">
+                                        <Upload className="text-white" size={24} />
+                                    </div>
                                     <input type="file" className="hidden" accept="image/*" onChange={(e) => handleSiteImageUpload(e, 'portfolio', 'main')} />
                                 </label>
                             </div>
+                            <input 
+                                type="text" 
+                                value={siteImages.portfolio.main}
+                                onChange={(e) => handleSiteImageUrlChange(e.target.value, 'portfolio', 'main')}
+                                placeholder="URL o /images/foto.jpg"
+                                className="w-full text-xs bg-gray-50 border border-gray-200 rounded p-2 focus:outline-none focus:border-primary"
+                            />
                         </div>
+
                         <div className="space-y-2">
                              <label className="text-xs font-bold uppercase text-gray-400">Imagen Pequeña Izq.</label>
                              <div className="relative aspect-square bg-gray-100 rounded-full overflow-hidden border border-gray-200">
                                 <img src={siteImages.portfolio.smallLeft} alt="Small Left" className="w-full h-full object-cover" />
-                                <label className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 hover:opacity-100 transition-opacity cursor-pointer">
-                                    <Upload className="text-white" size={24} />
+                                <label className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 hover:opacity-100 transition-opacity cursor-pointer group">
+                                    <div className="bg-black/50 p-2 rounded-full">
+                                        <Upload className="text-white" size={20} />
+                                    </div>
                                     <input type="file" className="hidden" accept="image/*" onChange={(e) => handleSiteImageUpload(e, 'portfolio', 'smallLeft')} />
                                 </label>
                             </div>
+                            <input 
+                                type="text" 
+                                value={siteImages.portfolio.smallLeft}
+                                onChange={(e) => handleSiteImageUrlChange(e.target.value, 'portfolio', 'smallLeft')}
+                                placeholder="URL o /images/foto.jpg"
+                                className="w-full text-xs bg-gray-50 border border-gray-200 rounded p-2 focus:outline-none focus:border-primary"
+                            />
                         </div>
+
                         <div className="space-y-2">
                              <label className="text-xs font-bold uppercase text-gray-400">Imagen Pequeña Der.</label>
                              <div className="relative aspect-square bg-gray-100 rounded-full overflow-hidden border border-gray-200">
                                 <img src={siteImages.portfolio.smallRight} alt="Small Right" className="w-full h-full object-cover" />
-                                <label className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 hover:opacity-100 transition-opacity cursor-pointer">
-                                    <Upload className="text-white" size={24} />
+                                <label className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 hover:opacity-100 transition-opacity cursor-pointer group">
+                                    <div className="bg-black/50 p-2 rounded-full">
+                                        <Upload className="text-white" size={20} />
+                                    </div>
                                     <input type="file" className="hidden" accept="image/*" onChange={(e) => handleSiteImageUpload(e, 'portfolio', 'smallRight')} />
                                 </label>
                             </div>
+                            <input 
+                                type="text" 
+                                value={siteImages.portfolio.smallRight}
+                                onChange={(e) => handleSiteImageUrlChange(e.target.value, 'portfolio', 'smallRight')}
+                                placeholder="URL o /images/foto.jpg"
+                                className="w-full text-xs bg-gray-50 border border-gray-200 rounded p-2 focus:outline-none focus:border-primary"
+                            />
                         </div>
                     </div>
                 </div>
@@ -507,21 +587,39 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ products, setProducts, siteImag
                             <label className="text-xs font-bold uppercase text-gray-400">Imagen Principal (Retrato)</label>
                             <div className="relative aspect-[3/4] bg-gray-100 rounded-xl overflow-hidden border border-gray-200 max-w-xs">
                                 <img src={siteImages.about.main} alt="About Main" className="w-full h-full object-cover" />
-                                <label className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 hover:opacity-100 transition-opacity cursor-pointer">
-                                    <Upload className="text-white" size={32} />
+                                <label className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 hover:opacity-100 transition-opacity cursor-pointer group">
+                                    <div className="bg-black/50 p-3 rounded-full">
+                                        <Upload className="text-white" size={24} />
+                                    </div>
                                     <input type="file" className="hidden" accept="image/*" onChange={(e) => handleSiteImageUpload(e, 'about', 'main')} />
                                 </label>
                             </div>
+                            <input 
+                                type="text" 
+                                value={siteImages.about.main}
+                                onChange={(e) => handleSiteImageUrlChange(e.target.value, 'about', 'main')}
+                                placeholder="URL o /images/foto.jpg"
+                                className="w-full max-w-xs text-xs bg-gray-50 border border-gray-200 rounded p-2 focus:outline-none focus:border-primary"
+                            />
                         </div>
                         <div className="space-y-2">
                             <label className="text-xs font-bold uppercase text-gray-400">Imagen Flotante (Pequeña)</label>
                             <div className="relative w-40 h-40 bg-gray-100 rounded-full overflow-hidden border border-gray-200">
                                 <img src={siteImages.about.small} alt="About Small" className="w-full h-full object-cover" />
-                                <label className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 hover:opacity-100 transition-opacity cursor-pointer">
-                                    <Upload className="text-white" size={24} />
+                                <label className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 hover:opacity-100 transition-opacity cursor-pointer group">
+                                    <div className="bg-black/50 p-2 rounded-full">
+                                        <Upload className="text-white" size={20} />
+                                    </div>
                                     <input type="file" className="hidden" accept="image/*" onChange={(e) => handleSiteImageUpload(e, 'about', 'small')} />
                                 </label>
                             </div>
+                            <input 
+                                type="text" 
+                                value={siteImages.about.small}
+                                onChange={(e) => handleSiteImageUrlChange(e.target.value, 'about', 'small')}
+                                placeholder="URL o /images/foto.jpg"
+                                className="w-full max-w-xs text-xs bg-gray-50 border border-gray-200 rounded p-2 focus:outline-none focus:border-primary"
+                            />
                         </div>
                     </div>
                 </div>
@@ -536,11 +634,20 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ products, setProducts, siteImag
                         <label className="text-xs font-bold uppercase text-gray-400">Imagen Inferior (Banner)</label>
                         <div className="relative h-48 bg-gray-100 rounded-xl overflow-hidden border border-gray-200">
                             <img src={siteImages.contact.banner} alt="Contact Banner" className="w-full h-full object-cover" />
-                            <label className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 hover:opacity-100 transition-opacity cursor-pointer">
-                                <Upload className="text-white" size={32} />
+                            <label className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 hover:opacity-100 transition-opacity cursor-pointer group">
+                                <div className="bg-black/50 p-3 rounded-full">
+                                    <Upload className="text-white" size={24} />
+                                </div>
                                 <input type="file" className="hidden" accept="image/*" onChange={(e) => handleSiteImageUpload(e, 'contact', 'banner')} />
                             </label>
                         </div>
+                        <input 
+                            type="text" 
+                            value={siteImages.contact.banner}
+                            onChange={(e) => handleSiteImageUrlChange(e.target.value, 'contact', 'banner')}
+                            placeholder="URL o /images/foto.jpg"
+                            className="w-full text-xs bg-gray-50 border border-gray-200 rounded p-2 focus:outline-none focus:border-primary"
+                        />
                     </div>
                 </div>
             </div>
