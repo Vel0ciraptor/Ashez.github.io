@@ -1,5 +1,5 @@
 import React, { useState, useRef, useLayoutEffect } from 'react';
-import { Plus, Trash2, Image as ImageIcon, X, Upload, Lock, Unlock } from 'lucide-react';
+import { Plus, Trash2, Image as ImageIcon, X, Upload, Lock, Unlock, Pencil, RotateCcw, Save } from 'lucide-react';
 import { Product } from '../types';
 import gsap from 'gsap';
 
@@ -16,6 +16,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ products, setProducts }) => {
   const containerRef = useRef<HTMLDivElement>(null);
 
   // Product Form State
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [newProduct, setNewProduct] = useState<Partial<Product>>({
     name: '',
     category: '',
@@ -87,6 +88,35 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ products, setProducts }) => {
     }));
   };
 
+  const handleEditProduct = (product: Product) => {
+    setNewProduct({
+      name: product.name,
+      category: product.category,
+      price: product.price,
+      discountPrice: product.discountPrice || 0,
+      description: product.description,
+      images: [...product.images]
+    });
+    setHasDiscount(!!product.discountPrice);
+    setEditingId(product.id);
+    // Scroll to top to see the form
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleCancelEdit = () => {
+    setNewProduct({
+        name: '',
+        category: '',
+        price: 0,
+        discountPrice: 0,
+        description: '',
+        images: []
+      });
+      setHasDiscount(false);
+      setEditingId(null);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newProduct.name || !newProduct.price || (newProduct.images?.length === 0)) {
@@ -94,36 +124,48 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ products, setProducts }) => {
       return;
     }
 
-    const productToAdd: Product = {
-      id: Date.now().toString(),
-      name: newProduct.name!,
-      category: newProduct.category || 'Varios', // Default to Varios if empty
-      price: newProduct.price!,
-      discountPrice: hasDiscount ? newProduct.discountPrice : undefined,
-      description: newProduct.description || '',
-      images: newProduct.images || []
-    };
-
-    setProducts(prev => [productToAdd, ...prev]);
+    if (editingId) {
+        // Update existing product
+        setProducts(prev => prev.map(p => {
+            if (p.id === editingId) {
+                return {
+                    ...p,
+                    name: newProduct.name!,
+                    category: newProduct.category || 'Varios',
+                    price: newProduct.price!,
+                    discountPrice: hasDiscount ? newProduct.discountPrice : undefined,
+                    description: newProduct.description || '',
+                    images: newProduct.images || []
+                };
+            }
+            return p;
+        }));
+        alert('Producto actualizado correctamente');
+    } else {
+        // Create new product
+        const productToAdd: Product = {
+            id: Date.now().toString(),
+            name: newProduct.name!,
+            category: newProduct.category || 'Varios',
+            price: newProduct.price!,
+            discountPrice: hasDiscount ? newProduct.discountPrice : undefined,
+            description: newProduct.description || '',
+            images: newProduct.images || []
+        };
+        setProducts(prev => [productToAdd, ...prev]);
+        alert('Producto agregado al catálogo correctamente');
+    }
     
     // Reset form
-    setNewProduct({
-      name: '',
-      category: '',
-      price: 0,
-      discountPrice: 0,
-      description: '',
-      images: []
-    });
-    setHasDiscount(false);
-    if (fileInputRef.current) fileInputRef.current.value = '';
-    
-    alert('Producto agregado al catálogo correctamente');
+    handleCancelEdit();
   };
 
   const handleDeleteProduct = (id: string) => {
       if(confirm('¿Estás seguro de eliminar este producto?')) {
           setProducts(prev => prev.filter(p => p.id !== id));
+          if (editingId === id) {
+              handleCancelEdit();
+          }
       }
   }
 
@@ -183,8 +225,19 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ products, setProducts }) => {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Form */}
-            <div className="admin-fade bg-white p-6 rounded-3xl shadow-sm border border-gray-100 h-fit">
-                <h2 className="font-bold text-xl mb-6">Agregar Nuevo Producto</h2>
+            <div className="admin-fade bg-white p-6 rounded-3xl shadow-sm border border-gray-100 h-fit sticky top-24">
+                <div className="flex justify-between items-center mb-6">
+                    <h2 className="font-bold text-xl">{editingId ? 'Editar Producto' : 'Agregar Nuevo Producto'}</h2>
+                    {editingId && (
+                        <button 
+                            onClick={handleCancelEdit}
+                            className="text-xs text-red-500 font-bold hover:underline flex items-center gap-1"
+                        >
+                            <RotateCcw size={12} /> Cancelar
+                        </button>
+                    )}
+                </div>
+                
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div>
                         <label className="block text-xs font-bold uppercase text-gray-400 mb-1">Nombre del Producto</label>
@@ -304,9 +357,10 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ products, setProducts }) => {
 
                     <button 
                         type="submit" 
-                        className="w-full bg-secondary text-white font-bold uppercase py-4 rounded-xl hover:bg-primary transition-colors flex items-center justify-center gap-2"
+                        className={`w-full text-white font-bold uppercase py-4 rounded-xl transition-colors flex items-center justify-center gap-2 ${editingId ? 'bg-primary hover:bg-orange-700' : 'bg-secondary hover:bg-primary'}`}
                     >
-                        <Plus size={20} /> Publicar Producto
+                        {editingId ? <Save size={20} /> : <Plus size={20} />} 
+                        {editingId ? 'Guardar Cambios' : 'Publicar Producto'}
                     </button>
                 </form>
             </div>
@@ -316,7 +370,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ products, setProducts }) => {
                 <h2 className="font-bold text-xl mb-6">Productos Activos ({products.length})</h2>
                 <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2">
                     {products.map(product => (
-                        <div key={product.id} className="bg-white p-3 rounded-xl shadow-sm flex gap-4 items-center">
+                        <div key={product.id} className={`bg-white p-3 rounded-xl shadow-sm flex gap-4 items-center border ${editingId === product.id ? 'border-primary ring-1 ring-primary' : 'border-transparent'}`}>
                             <img src={product.images[0]} alt={product.name} className="w-16 h-16 rounded-lg object-cover bg-gray-100" />
                             <div className="flex-1">
                                 <h4 className="font-bold text-sm">{product.name}</h4>
@@ -332,12 +386,22 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ products, setProducts }) => {
                                      <span className="text-gray-400 ml-2">• {product.category}</span>
                                 </div>
                             </div>
-                            <button 
-                                onClick={() => handleDeleteProduct(product.id)}
-                                className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                            >
-                                <Trash2 size={18} />
-                            </button>
+                            <div className="flex flex-col gap-1">
+                                <button 
+                                    onClick={() => handleEditProduct(product)}
+                                    className="p-2 text-gray-400 hover:text-primary hover:bg-orange-50 rounded-lg transition-colors"
+                                    title="Editar"
+                                >
+                                    <Pencil size={18} />
+                                </button>
+                                <button 
+                                    onClick={() => handleDeleteProduct(product.id)}
+                                    className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                                    title="Eliminar"
+                                >
+                                    <Trash2 size={18} />
+                                </button>
+                            </div>
                         </div>
                     ))}
                 </div>
