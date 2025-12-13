@@ -4,16 +4,17 @@ const Footer: React.FC = () => {
   return (
     <footer className="bg-secondary text-white border-t border-gray-800">
        {/* Marquee */}
-       <div className="w-full h-12 bg-primary flex items-center overflow-hidden whitespace-nowrap">
-        <div className="animate-[marquee_20s_linear_infinite] flex space-x-8 text-white font-bold uppercase tracking-widest text-xs">
-          {[...Array(10)].map((_, i) => (
+       <div className="w-full h-12 bg-primary flex items-center overflow-hidden whitespace-nowrap relative">
+        <div className="animate-marquee flex gap-8 items-center min-w-full">
+            {/* Duplicamos el contenido lo suficiente para asegurar que cubra pantallas grandes y el loop sea fluido */}
+          {[...Array(20)].map((_, i) => (
             <React.Fragment key={i}>
-              <span>Hecho a Mano en Bolivia</span>
-              <span>•</span>
-              <span>Diseños Personalizados</span>
-              <span>•</span>
-              <span>Calidad Premium</span>
-              <span>•</span>
+              <span className="font-bold uppercase tracking-widest text-xs text-white">Hecho a Mano en Bolivia</span>
+              <span className="text-white">•</span>
+              <span className="font-bold uppercase tracking-widest text-xs text-white">Diseños Personalizados</span>
+              <span className="text-white">•</span>
+              <span className="font-bold uppercase tracking-widest text-xs text-white">Calidad Premium</span>
+              <span className="text-white">•</span>
             </React.Fragment>
           ))}
         </div>

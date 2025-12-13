@@ -13,6 +13,36 @@ export interface NavItem {
   href: string;
 }
 
+export interface SiteImages {
+  portfolio: {
+    main: string;
+    smallLeft: string;
+    smallRight: string;
+  };
+  about: {
+    main: string;
+    small: string;
+  };
+  contact: {
+    banner: string;
+  };
+}
+
+export const DEFAULT_SITE_IMAGES: SiteImages = {
+  portfolio: {
+    main: 'https://images.unsplash.com/photo-1434389677669-e08b4cac3105?q=80&w=800', // Center image
+    smallLeft: 'https://images.unsplash.com/photo-1605218427368-35b80a37db2f?q=80&w=400', // Kit/Wools
+    smallRight: 'https://images.unsplash.com/photo-1606622867087-0b0409249764?q=80&w=400' // Needle/Thread
+  },
+  about: {
+    main: 'https://images.unsplash.com/photo-1574621100236-d25b64cfd647?q=80&w=600', // Woman wearing knit
+    small: 'https://images.unsplash.com/photo-1620799140408-ed5341cd2431?q=80&w=300' // Detail wool
+  },
+  contact: {
+    banner: 'https://images.unsplash.com/photo-1542060748-10c28b62716f?q=80&w=600' // Workshop
+  }
+};
+
 export const PRODUCTS: Product[] = [
   {
     id: '1',

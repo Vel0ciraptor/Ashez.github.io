@@ -2,10 +2,15 @@ import React, { useLayoutEffect, useRef } from 'react';
 import { ArrowRight, Star } from 'lucide-react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { SiteImages } from '../types';
 
 gsap.registerPlugin(ScrollTrigger);
 
-const About: React.FC = () => {
+interface AboutProps {
+    images: SiteImages['about'];
+}
+
+const About: React.FC<AboutProps> = ({ images }) => {
   const container = useRef<HTMLElement>(null);
 
   useLayoutEffect(() => {
@@ -100,8 +105,7 @@ const About: React.FC = () => {
               
               <div className="about-img relative h-full w-full rounded-[3rem] overflow-hidden z-10 shadow-2xl group">
                 <img 
-                  src="/images/about-main.jpg"
-                  onError={(e) => { e.currentTarget.src = "https://images.unsplash.com/photo-1574621100236-d25b64cfd647?q=80&w=600"; }}
+                  src={images.main}
                   alt="Mujer con prenda tejida" 
                   className="h-full w-full object-cover object-center group-hover:scale-105 transition-transform duration-700"
                 />
@@ -112,7 +116,7 @@ const About: React.FC = () => {
                     <path id="circlePath" d="M 50, 50 m -37, 0 a 37,37 0 1,1 74,0 a 37,37 0 1,1 -74,0" fill="transparent" />
                     <text fontSize="13" fontWeight="bold" letterSpacing="2">
                       <textPath href="#circlePath">
-                        HANDMADE • LOVE • ASHEZ •
+                        HANDMADE • ART • ASHEZ •
                       </textPath>
                     </text>
                   </svg>
@@ -125,9 +129,8 @@ const About: React.FC = () => {
               {/* Decorative element */}
               <div className="absolute -bottom-8 -left-8 md:-left-16 z-20 hidden md:block">
                 <img 
-                  src="/images/about-detail.jpg"
-                  onError={(e) => { e.currentTarget.src = "https://images.unsplash.com/photo-1620799140408-ed5341cd2431?q=80&w=300"; }}
-                  alt="Lana y agujas" 
+                  src={images.small}
+                  alt="Lana y agujas detalle" 
                   className="w-32 h-32 md:w-40 md:h-40 rounded-full object-cover border-4 border-white shadow-xl transform hover:-rotate-12 transition-transform"
                 />
               </div>

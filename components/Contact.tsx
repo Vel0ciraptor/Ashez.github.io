@@ -2,10 +2,15 @@ import React, { useState, useLayoutEffect, useRef } from 'react';
 import { ArrowRight, Mail, Phone, MapPin, Instagram, Facebook, Twitter, MessageCircle } from 'lucide-react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { SiteImages } from '../types';
 
 gsap.registerPlugin(ScrollTrigger);
 
-const Contact: React.FC = () => {
+interface ContactProps {
+    images: SiteImages['contact'];
+}
+
+const Contact: React.FC<ContactProps> = ({ images }) => {
   const container = useRef<HTMLElement>(null);
   const [formData, setFormData] = useState({
     name: '',
@@ -141,7 +146,7 @@ const Contact: React.FC = () => {
                             <Mail className="mt-1 text-gray-500 group-hover:text-primary transition-colors" size={20} />
                             <div>
                                 <p className="text-xs uppercase tracking-widest text-gray-500 mb-1">Email</p>
-                                <p className="text-lg">ashez.ventas@gmail.com</p>
+                                <p className="text-lg">ashez@gmail.com</p>
                             </div>
                         </div>
                         <div className="flex items-start gap-4 group cursor-pointer hover:text-white transition-colors">
@@ -179,8 +184,7 @@ const Contact: React.FC = () => {
              {/* Bottom Image */}
              <div className="mt-12 hidden lg:block relative rounded-2xl overflow-hidden group">
                 <img 
-                    src="/images/contact-bg.jpg"
-                    onError={(e) => { e.currentTarget.src = "https://images.unsplash.com/photo-1542060748-10c28b62716f?q=80&w=600"; }}
+                    src={images.banner}
                     alt="Taller de costura" 
                     className="w-full h-48 object-cover opacity-60 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500"
                 />

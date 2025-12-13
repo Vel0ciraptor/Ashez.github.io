@@ -81,9 +81,8 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
                   {/* Image inside text line 1 */}
                   <div className="hero-image-1 relative inline-block align-middle mx-2 md:mx-4">
                     <img 
-                      src="/images/hero-1.jpg" 
-                      alt="Detalle tejido" 
-                      onError={(e) => { e.currentTarget.src = "https://images.unsplash.com/photo-1598918239088-3486df81559c?q=80&w=300"; }}
+                      src="https://images.unsplash.com/photo-1582794543139-8ac92a90030a?q=80&w=300" 
+                      alt="Detalle bordado flores" 
                       className="w-16 h-16 md:w-24 md:h-24 object-cover rounded-full border-2 border-primary bg-white -rotate-12 hover:rotate-0 transition-transform duration-500"
                     />
                   </div>
@@ -100,9 +99,8 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
                {/* Image inside text line 2 */}
               <div className="hero-image-2 relative inline-block align-middle -mt-2 mx-2">
                  <img 
-                  src="/images/hero-2.jpg" 
-                  alt="Bordado detalle" 
-                  onError={(e) => { e.currentTarget.src = "https://images.unsplash.com/photo-1617326867011-88b901614777?q=80&w=300"; }}
+                  src="https://images.unsplash.com/photo-1632649666776-6554b7c8df02?q=80&w=300" 
+                  alt="Manos tejiendo" 
                   className="w-20 h-20 md:w-32 md:h-32 object-cover rotate-12 z-10 relative rounded-2xl border-2 border-white shadow-lg"
                 />
               </div>
