@@ -34,6 +34,14 @@ export interface SiteImages {
   };
 }
 
+export interface Testimonial {
+  id: number;
+  name: string;
+  text: string;
+  product: string;
+  image: string;
+}
+
 export const DEFAULT_SITE_IMAGES: SiteImages = {
   hero: {
     img1: 'https://images.unsplash.com/photo-1582794543139-8ac92a90030a?q=80&w=300', // Detail embroidery
@@ -52,6 +60,44 @@ export const DEFAULT_SITE_IMAGES: SiteImages = {
     banner: 'https://images.unsplash.com/photo-1542060748-10c28b62716f?q=80&w=600' // Workshop
   }
 };
+
+export const DEFAULT_TESTIMONIALS: Testimonial[] = [
+  {
+    id: 1,
+    name: "Valentina M.",
+    text: "El detalle del bordado es impresionante. Pedí un retrato de mi mascota y capturaron su esencia perfectamente.",
+    product: "Retrato Bordado",
+    image: "https://images.unsplash.com/photo-1620799140408-ed5341cd2431?q=80&w=600"
+  },
+  {
+    id: 2,
+    name: "Carlos R.",
+    text: "La calidad de la lana es muy suave y el tejido es firme. Se nota el amor y el tiempo dedicado en cada punto.",
+    product: "Bufanda Tejida",
+    image: "https://images.unsplash.com/photo-1605218427368-35b80a37db2f?q=80&w=600"
+  },
+  {
+    id: 3,
+    name: "Sofia L.",
+    text: "Compré un kit para empezar a bordar y los parches son hermosos. El packaging es precioso, ideal para regalo.",
+    product: "Kit & Accesorios",
+    image: "https://images.unsplash.com/photo-1618331835717-801e976710b2?q=80&w=600"
+  },
+  {
+    id: 4,
+    name: "Andrea B.",
+    text: "Me tejieron un suéter a medida y me queda perfecto. Es mi prenda favorita para el invierno paceño.",
+    product: "Suéter Alpaca",
+    image: "https://images.unsplash.com/photo-1621250320499-526462940263?q=80&w=600"
+  },
+  {
+    id: 5,
+    name: "Martín G.",
+    text: "Mandé a personalizar una chaqueta de jean con un diseño floral en la espalda. Quedó increíble, muy recomendado.",
+    product: "Chaqueta Custom",
+    image: "https://images.unsplash.com/photo-1543854589-3221e9c20a8c?q=80&w=600"
+  }
+];
 
 export const PRODUCTS: Product[] = [
   {

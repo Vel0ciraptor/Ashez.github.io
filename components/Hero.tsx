@@ -15,7 +15,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, language, images }) => {
     es: {
       line1: "CELEBRANDO",
       line2Part1: "EL",
-      line2Part2: "VALOR",
+      line2Part2: "✦",
       line2Part3: "DEL",
       line3: "TIEMPO Y LA",
       line4: "CREATIVIDAD",
@@ -90,7 +90,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, language, images }) => {
         
         {/* Floating Description */}
         <div className="hero-floating absolute top-0 right-4 md:right-20 max-w-[200px] text-xs font-medium text-gray-500 hidden sm:block">
-          <p className="font-bold text-secondary mb-1 uppercase">ASHEZ*</p>
+          <p className="font-bold text-secondary mb-1 uppercase">ASHEZ✦</p>
           <p>{t.floatingTitle}</p>
         </div>
 

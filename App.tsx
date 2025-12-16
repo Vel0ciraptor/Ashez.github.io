@@ -9,7 +9,8 @@ import About from './components/About';
 import Contact from './components/Contact';
 import Footer from './components/Footer';
 import Cart from './components/Cart';
-import { Product, PRODUCTS as INITIAL_PRODUCTS, SiteImages, DEFAULT_SITE_IMAGES, Language } from './types';
+import Testimonials from './components/Testimonials';
+import { Product, PRODUCTS as INITIAL_PRODUCTS, SiteImages, DEFAULT_SITE_IMAGES, Language, Testimonial, DEFAULT_TESTIMONIALS } from './types';
 
 function App() {
   const [cartItems, setCartItems] = useState<Product[]>([]);
@@ -17,6 +18,7 @@ function App() {
   const [currentView, setCurrentView] = useState('home'); // 'home', 'catalog', 'admin'
   const [products, setProducts] = useState<Product[]>(INITIAL_PRODUCTS);
   const [siteImages, setSiteImages] = useState<SiteImages>(DEFAULT_SITE_IMAGES);
+  const [testimonials, setTestimonials] = useState<Testimonial[]>(DEFAULT_TESTIMONIALS);
   const [language, setLanguage] = useState<Language>('es');
 
   // Scroll to top when view changes
@@ -60,6 +62,7 @@ function App() {
         {currentView === 'home' && (
             <>
                 <Hero onNavigate={setCurrentView} language={language} images={siteImages.hero} />
+                <Testimonials language={language} testimonials={testimonials} />
                 <Features images={siteImages.portfolio} language={language} />
                 <Catalog products={products} addToCart={addToCart} onNavigate={setCurrentView} language={language} />
                 <About images={siteImages.about} language={language} />
@@ -77,6 +80,8 @@ function App() {
               setProducts={setProducts} 
               siteImages={siteImages}
               setSiteImages={setSiteImages}
+              testimonials={testimonials}
+              setTestimonials={setTestimonials}
             />
         )}
       </main>

@@ -1,6 +1,6 @@
 import React, { useState, useRef, useLayoutEffect } from 'react';
-import { Plus, Trash2, Image as ImageIcon, X, Upload, Lock, Unlock, Pencil, RotateCcw, Save, Layout, Package, Link as LinkIcon } from 'lucide-react';
-import { Product, SiteImages } from '../types';
+import { Plus, Trash2, Image as ImageIcon, X, Upload, Lock, Unlock, Pencil, RotateCcw, Save, Layout, Package, MessageSquare } from 'lucide-react';
+import { Product, SiteImages, Testimonial } from '../types';
 import gsap from 'gsap';
 
 interface AdminPanelProps {
@@ -8,9 +8,11 @@ interface AdminPanelProps {
   setProducts: React.Dispatch<React.SetStateAction<Product[]>>;
   siteImages: SiteImages;
   setSiteImages: React.Dispatch<React.SetStateAction<SiteImages>>;
+  testimonials: Testimonial[];
+  setTestimonials: React.Dispatch<React.SetStateAction<Testimonial[]>>;
 }
 
-const AdminPanel: React.FC<AdminPanelProps> = ({ products, setProducts, siteImages, setSiteImages }) => {
+const AdminPanel: React.FC<AdminPanelProps> = ({ products, setProducts, siteImages, setSiteImages, testimonials, setTestimonials }) => {
   // Auth State
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState('');
@@ -18,7 +20,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ products, setProducts, siteImag
   const containerRef = useRef<HTMLDivElement>(null);
 
   // Tab State
-  const [activeTab, setActiveTab] = useState<'products' | 'content'>('products');
+  const [activeTab, setActiveTab] = useState<'products' | 'content' | 'testimonials'>('products');
 
   // Product Form State
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -32,6 +34,16 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ products, setProducts, siteImag
   const [imageUrlInput, setImageUrlInput] = useState(''); // State for manual URL entry
   const [hasDiscount, setHasDiscount] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Testimonial Form State
+  const [editingTestimonialId, setEditingTestimonialId] = useState<number | null>(null);
+  const [newTestimonial, setNewTestimonial] = useState<Partial<Testimonial>>({
+      name: '',
+      text: '',
+      product: '',
+      image: ''
+  });
+  const testimonialFileInputRef = useRef<HTMLInputElement>(null);
 
   // Derive existing categories for suggestions
   const existingCategories = Array.from(new Set(products.map(p => p.category)));
@@ -51,7 +63,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ products, setProducts, siteImag
   // --- Auth Handlers ---
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    // Use env variable or fallback (NOTE: In Vite use import.meta.env.VITE_..., here we shim with process.env)
+    // Use env variable or fallback
     const envPassword = (import.meta as any).env?.VITE_ADMIN_PASSWORD || 'admin123';
     
     if (password === envPassword) {
@@ -222,6 +234,56 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ products, setProducts, siteImag
       }
   }
 
+  // --- Testimonial Handlers ---
+  const handleTestimonialChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      setNewTestimonial({ ...newTestimonial, [e.target.name]: e.target.value });
+  };
+
+  const handleTestimonialImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+        const file = e.target.files[0];
+        const reader = new FileReader();
+        reader.onloadend = () => {
+            setNewTestimonial({ ...newTestimonial, image: reader.result as string });
+        };
+        reader.readAsDataURL(file);
+    }
+  };
+
+  const handleEditTestimonial = (t: Testimonial) => {
+      setNewTestimonial(t);
+      setEditingTestimonialId(t.id);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleCancelTestimonial = () => {
+      setNewTestimonial({ name: '', text: '', product: '', image: '' });
+      setEditingTestimonialId(null);
+      if(testimonialFileInputRef.current) testimonialFileInputRef.current.value = '';
+  };
+
+  const handleSubmitTestimonial = (e: React.FormEvent) => {
+      e.preventDefault();
+      if (!newTestimonial.name || !newTestimonial.text || !newTestimonial.image) {
+          alert("Completa todos los campos");
+          return;
+      }
+
+      if (editingTestimonialId) {
+          setTestimonials(prev => prev.map(t => t.id === editingTestimonialId ? { ...t, ...newTestimonial } as Testimonial : t));
+      } else {
+          const newId = Math.max(...testimonials.map(t => t.id), 0) + 1;
+          setTestimonials(prev => [...prev, { ...newTestimonial, id: newId } as Testimonial]);
+      }
+      handleCancelTestimonial();
+  };
+
+  const handleDeleteTestimonial = (id: number) => {
+      if(confirm("¿Eliminar este testimonio?")) {
+          setTestimonials(prev => prev.filter(t => t.id !== id));
+      }
+  };
+
   // --- Auth Screen Render ---
   if (!isAuthenticated) {
     return (
@@ -277,28 +339,35 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ products, setProducts, siteImag
         </div>
 
         {/* Tabs */}
-        <div className="admin-fade flex gap-4 mb-8">
+        <div className="admin-fade flex gap-4 mb-8 overflow-x-auto pb-2 no-scrollbar">
             <button 
                 onClick={() => setActiveTab('products')}
-                className={`flex-1 py-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-all ${activeTab === 'products' ? 'bg-secondary text-white shadow-lg' : 'bg-white text-gray-400 hover:bg-gray-100'}`}
+                className={`flex-1 min-w-[150px] py-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-all ${activeTab === 'products' ? 'bg-secondary text-white shadow-lg' : 'bg-white text-gray-400 hover:bg-gray-100'}`}
             >
                 <Package size={20} />
-                Gestionar Productos
+                Productos
+            </button>
+            <button 
+                onClick={() => setActiveTab('testimonials')}
+                className={`flex-1 min-w-[150px] py-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-all ${activeTab === 'testimonials' ? 'bg-secondary text-white shadow-lg' : 'bg-white text-gray-400 hover:bg-gray-100'}`}
+            >
+                <MessageSquare size={20} />
+                Testimonios
             </button>
             <button 
                 onClick={() => setActiveTab('content')}
-                className={`flex-1 py-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-all ${activeTab === 'content' ? 'bg-secondary text-white shadow-lg' : 'bg-white text-gray-400 hover:bg-gray-100'}`}
+                className={`flex-1 min-w-[150px] py-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-all ${activeTab === 'content' ? 'bg-secondary text-white shadow-lg' : 'bg-white text-gray-400 hover:bg-gray-100'}`}
             >
                 <Layout size={20} />
-                Imágenes del Sitio
+                Imágenes
             </button>
         </div>
 
-        {activeTab === 'products' ? (
+        {activeTab === 'products' && (
              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                {/* Form */}
+                {/* Product Form ... (Existing Form) */}
                 <div className="admin-fade bg-white p-6 rounded-3xl shadow-sm border border-gray-100 h-fit sticky top-24">
-                    <div className="flex justify-between items-center mb-6">
+                     <div className="flex justify-between items-center mb-6">
                         <h2 className="font-bold text-xl">{editingId ? 'Editar Producto' : 'Agregar Nuevo Producto'}</h2>
                         {editingId && (
                             <button 
@@ -311,7 +380,8 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ products, setProducts, siteImag
                     </div>
                     
                     <form onSubmit={handleSubmit} className="space-y-4">
-                        <div>
+                        {/* ... Existing Product Fields ... */}
+                         <div>
                             <label className="block text-xs font-bold uppercase text-gray-400 mb-1">Nombre del Producto</label>
                             <input 
                                 type="text" 
@@ -322,7 +392,6 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ products, setProducts, siteImag
                                 placeholder="Ej. Bufanda Alpaca"
                             />
                         </div>
-                        
                         <div className="grid grid-cols-2 gap-4">
                             <div>
                                 <label className="block text-xs font-bold uppercase text-gray-400 mb-1">Precio (Bs)</label>
@@ -353,7 +422,6 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ products, setProducts, siteImag
                                 </datalist>
                             </div>
                         </div>
-
                         <div className="flex items-center gap-2 py-2">
                             <input 
                                 type="checkbox" 
@@ -364,7 +432,6 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ products, setProducts, siteImag
                             />
                             <label htmlFor="hasDiscount" className="text-sm font-medium text-gray-700">Tiene descuento</label>
                         </div>
-
                         {hasDiscount && (
                             <div>
                                 <label className="block text-xs font-bold uppercase text-red-400 mb-1">Precio con Descuento (Bs)</label>
@@ -378,7 +445,6 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ products, setProducts, siteImag
                                 />
                             </div>
                         )}
-
                         <div>
                             <label className="block text-xs font-bold uppercase text-gray-400 mb-1">Descripción</label>
                             <textarea 
@@ -390,11 +456,8 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ products, setProducts, siteImag
                                 placeholder="Detalles del producto..."
                             />
                         </div>
-
                         <div>
                             <label className="block text-xs font-bold uppercase text-gray-400 mb-1">Imágenes (Máx 3)</label>
-                            
-                            {/* Visual Preview */}
                             <div className="flex gap-2 mb-3">
                                 {newProduct.images?.map((img, index) => (
                                     <div key={index} className="relative w-16 h-16 rounded-lg overflow-hidden border border-gray-200 group">
@@ -409,8 +472,6 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ products, setProducts, siteImag
                                     </div>
                                 ))}
                             </div>
-
-                            {/* Controls */}
                             {(newProduct.images?.length || 0) < 3 && (
                                 <div className="space-y-3">
                                     <div className="flex gap-2">
@@ -430,7 +491,6 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ products, setProducts, siteImag
                                             onChange={handleImageUpload}
                                         />
                                     </div>
-                                    
                                     <div className="flex gap-2">
                                         <input 
                                             type="text" 
@@ -448,9 +508,6 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ products, setProducts, siteImag
                                             <Plus size={18} />
                                         </button>
                                     </div>
-                                    <p className="text-[10px] text-gray-400">
-                                        Nota: Si usas rutas locales (ej: /images/foto.jpg), asegúrate de que el archivo exista en la carpeta pública.
-                                    </p>
                                 </div>
                             )}
                         </div>
@@ -507,9 +564,138 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ products, setProducts, siteImag
                     </div>
                 </div>
             </div>
-        ) : (
+        )}
+
+        {activeTab === 'testimonials' && (
+             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {/* Testimonial Form */}
+                <div className="admin-fade bg-white p-6 rounded-3xl shadow-sm border border-gray-100 h-fit sticky top-24">
+                     <div className="flex justify-between items-center mb-6">
+                        <h2 className="font-bold text-xl">{editingTestimonialId ? 'Editar Testimonio' : 'Agregar Nuevo Testimonio'}</h2>
+                        {editingTestimonialId && (
+                            <button 
+                                onClick={handleCancelTestimonial}
+                                className="text-xs text-red-500 font-bold hover:underline flex items-center gap-1"
+                            >
+                                <RotateCcw size={12} /> Cancelar
+                            </button>
+                        )}
+                    </div>
+
+                    <form onSubmit={handleSubmitTestimonial} className="space-y-4">
+                        <div>
+                             <label className="block text-xs font-bold uppercase text-gray-400 mb-1">Nombre Cliente</label>
+                             <input 
+                                type="text"
+                                name="name"
+                                value={newTestimonial.name}
+                                onChange={handleTestimonialChange}
+                                className="w-full bg-gray-50 border border-gray-200 rounded-lg p-3 focus:outline-none focus:border-primary"
+                                placeholder="María Pérez"
+                             />
+                        </div>
+                        <div>
+                             <label className="block text-xs font-bold uppercase text-gray-400 mb-1">Producto Comprado</label>
+                             <input 
+                                type="text"
+                                name="product"
+                                value={newTestimonial.product}
+                                onChange={handleTestimonialChange}
+                                className="w-full bg-gray-50 border border-gray-200 rounded-lg p-3 focus:outline-none focus:border-primary"
+                                placeholder="Ej. Kit Bordado"
+                             />
+                        </div>
+                        <div>
+                             <label className="block text-xs font-bold uppercase text-gray-400 mb-1">Reseña</label>
+                             <textarea 
+                                name="text"
+                                value={newTestimonial.text}
+                                onChange={handleTestimonialChange}
+                                rows={3}
+                                className="w-full bg-gray-50 border border-gray-200 rounded-lg p-3 focus:outline-none focus:border-primary"
+                                placeholder="El producto me encantó..."
+                             />
+                        </div>
+                        <div>
+                             <label className="block text-xs font-bold uppercase text-gray-400 mb-1">Imagen de Fondo</label>
+                             {newTestimonial.image && (
+                                <div className="w-full h-32 mb-2 rounded-lg overflow-hidden bg-gray-100 border border-gray-200">
+                                    <img src={newTestimonial.image} alt="Preview" className="w-full h-full object-cover" />
+                                </div>
+                             )}
+                             <div className="flex gap-2">
+                                <button 
+                                    type="button"
+                                    onClick={() => testimonialFileInputRef.current?.click()}
+                                    className="flex-1 py-2 px-4 border border-dashed border-gray-300 rounded-lg text-gray-500 hover:text-primary hover:border-primary hover:bg-orange-50 transition-colors flex items-center justify-center gap-2 text-sm"
+                                >
+                                    <Upload size={16} /> Subir Imagen
+                                </button>
+                                <input 
+                                    type="file" 
+                                    ref={testimonialFileInputRef}
+                                    className="hidden" 
+                                    accept="image/*"
+                                    onChange={handleTestimonialImageUpload}
+                                />
+                             </div>
+                             <input 
+                                type="text"
+                                name="image"
+                                value={newTestimonial.image}
+                                onChange={handleTestimonialChange}
+                                placeholder="O pega una URL..."
+                                className="w-full mt-2 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary"
+                             />
+                        </div>
+
+                        <button 
+                            type="submit" 
+                            className={`w-full text-white font-bold uppercase py-4 rounded-xl transition-colors flex items-center justify-center gap-2 ${editingTestimonialId ? 'bg-primary hover:bg-orange-700' : 'bg-secondary hover:bg-primary'}`}
+                        >
+                            <Save size={20} />
+                            {editingTestimonialId ? 'Guardar Cambios' : 'Publicar Testimonio'}
+                        </button>
+                    </form>
+                </div>
+
+                {/* Testimonial List */}
+                <div className="admin-fade space-y-4">
+                     <h2 className="font-bold text-xl mb-6">Testimonios Activos ({testimonials.length})</h2>
+                     {testimonials.map(t => (
+                         <div key={t.id} className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex gap-4">
+                             <div className="w-20 h-20 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
+                                 <img src={t.image} alt={t.name} className="w-full h-full object-cover" />
+                             </div>
+                             <div className="flex-1">
+                                 <h4 className="font-bold text-sm">{t.name}</h4>
+                                 <p className="text-xs text-primary font-bold mb-1">{t.product}</p>
+                                 <p className="text-xs text-gray-500 line-clamp-2 italic">"{t.text}"</p>
+                             </div>
+                             <div className="flex flex-col gap-1 justify-center">
+                                 <button 
+                                     onClick={() => handleEditTestimonial(t)}
+                                     className="p-2 text-gray-400 hover:text-primary hover:bg-orange-50 rounded-lg"
+                                 >
+                                     <Pencil size={18} />
+                                 </button>
+                                 <button 
+                                     onClick={() => handleDeleteTestimonial(t.id)}
+                                     className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg"
+                                 >
+                                     <Trash2 size={18} />
+                                 </button>
+                             </div>
+                         </div>
+                     ))}
+                </div>
+             </div>
+        )}
+
+        {activeTab === 'content' && (
             /* --- SITE CONTENT MANAGEMENT --- */
              <div className="admin-fade space-y-8">
+                {/* ... (Existing Image Content Editors) ... */}
                 {/* Hero Section */}
                 <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
                     <h2 className="font-bold text-xl mb-4 flex items-center gap-2">
@@ -562,7 +748,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ products, setProducts, siteImag
                 <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
                     <h2 className="font-bold text-xl mb-4 flex items-center gap-2">
                         <ImageIcon size={20} className="text-primary" />
-                        Sección Portafolio / Features
+                        Sección Bento Grid / Features
                     </h2>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div className="space-y-2">
@@ -586,7 +772,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ products, setProducts, siteImag
                         </div>
 
                         <div className="space-y-2">
-                             <label className="text-xs font-bold uppercase text-gray-400">Imagen Pequeña Izq.</label>
+                             <label className="text-xs font-bold uppercase text-gray-400">Imagen Textura</label>
                              <div className="relative aspect-square bg-gray-100 rounded-full overflow-hidden border border-gray-200">
                                 <img src={siteImages.portfolio.smallLeft} alt="Small Left" className="w-full h-full object-cover" />
                                 <label className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 hover:opacity-100 transition-opacity cursor-pointer group">
@@ -606,7 +792,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ products, setProducts, siteImag
                         </div>
 
                         <div className="space-y-2">
-                             <label className="text-xs font-bold uppercase text-gray-400">Imagen Pequeña Der.</label>
+                             <label className="text-xs font-bold uppercase text-gray-400">Imagen Artesanía (Larga)</label>
                              <div className="relative aspect-square bg-gray-100 rounded-full overflow-hidden border border-gray-200">
                                 <img src={siteImages.portfolio.smallRight} alt="Small Right" className="w-full h-full object-cover" />
                                 <label className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 hover:opacity-100 transition-opacity cursor-pointer group">
