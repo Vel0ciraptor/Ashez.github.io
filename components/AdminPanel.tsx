@@ -51,7 +51,10 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ products, setProducts, siteImag
   // --- Auth Handlers ---
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    if (password === 'c0ntr4s3ñ4*') {
+    // Use env variable or fallback (NOTE: In Vite use import.meta.env.VITE_..., here we shim with process.env)
+    const envPassword = (import.meta as any).env?.VITE_ADMIN_PASSWORD || 'admin123';
+    
+    if (password === envPassword) {
       setIsAuthenticated(true);
       setAuthError(false);
     } else {
@@ -507,6 +510,54 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ products, setProducts, siteImag
         ) : (
             /* --- SITE CONTENT MANAGEMENT --- */
              <div className="admin-fade space-y-8">
+                {/* Hero Section */}
+                <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
+                    <h2 className="font-bold text-xl mb-4 flex items-center gap-2">
+                        <ImageIcon size={20} className="text-primary" />
+                        Sección Hero (Portada)
+                    </h2>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="space-y-2">
+                            <label className="text-xs font-bold uppercase text-gray-400">Imagen 1 (Circular / Detalle)</label>
+                            <div className="relative w-24 h-24 bg-gray-100 rounded-full overflow-hidden border border-gray-200">
+                                <img src={siteImages.hero.img1} alt="Hero 1" className="w-full h-full object-cover" />
+                                <label className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 hover:opacity-100 transition-opacity cursor-pointer group">
+                                    <div className="bg-black/50 p-2 rounded-full">
+                                        <Upload className="text-white" size={16} />
+                                    </div>
+                                    <input type="file" className="hidden" accept="image/*" onChange={(e) => handleSiteImageUpload(e, 'hero', 'img1')} />
+                                </label>
+                            </div>
+                            <input 
+                                type="text" 
+                                value={siteImages.hero.img1}
+                                onChange={(e) => handleSiteImageUrlChange(e.target.value, 'hero', 'img1')}
+                                placeholder="URL"
+                                className="w-full text-xs bg-gray-50 border border-gray-200 rounded p-2 focus:outline-none focus:border-primary"
+                            />
+                        </div>
+                         <div className="space-y-2">
+                            <label className="text-xs font-bold uppercase text-gray-400">Imagen 2 (Cuadrada / Manos)</label>
+                            <div className="relative w-24 h-24 bg-gray-100 rounded-xl overflow-hidden border border-gray-200">
+                                <img src={siteImages.hero.img2} alt="Hero 2" className="w-full h-full object-cover" />
+                                <label className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 hover:opacity-100 transition-opacity cursor-pointer group">
+                                    <div className="bg-black/50 p-2 rounded-full">
+                                        <Upload className="text-white" size={16} />
+                                    </div>
+                                    <input type="file" className="hidden" accept="image/*" onChange={(e) => handleSiteImageUpload(e, 'hero', 'img2')} />
+                                </label>
+                            </div>
+                            <input 
+                                type="text" 
+                                value={siteImages.hero.img2}
+                                onChange={(e) => handleSiteImageUrlChange(e.target.value, 'hero', 'img2')}
+                                placeholder="URL"
+                                className="w-full text-xs bg-gray-50 border border-gray-200 rounded p-2 focus:outline-none focus:border-primary"
+                            />
+                        </div>
+                    </div>
+                </div>
+
                 {/* Portafolio Section */}
                 <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
                     <h2 className="font-bold text-xl mb-4 flex items-center gap-2">

@@ -13,7 +13,13 @@ export interface NavItem {
   href: string;
 }
 
+export type Language = 'es' | 'en';
+
 export interface SiteImages {
+  hero: {
+    img1: string;
+    img2: string;
+  };
   portfolio: {
     main: string;
     smallLeft: string;
@@ -29,6 +35,10 @@ export interface SiteImages {
 }
 
 export const DEFAULT_SITE_IMAGES: SiteImages = {
+  hero: {
+    img1: 'https://images.unsplash.com/photo-1582794543139-8ac92a90030a?q=80&w=300', // Detail embroidery
+    img2: 'https://images.unsplash.com/photo-1632649666776-6554b7c8df02?q=80&w=300'  // Hands knitting
+  },
   portfolio: {
     main: 'https://images.unsplash.com/photo-1434389677669-e08b4cac3105?q=80&w=800', // Center image
     smallLeft: 'https://images.unsplash.com/photo-1605218427368-35b80a37db2f?q=80&w=400', // Kit/Wools

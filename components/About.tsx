@@ -2,16 +2,40 @@ import React, { useLayoutEffect, useRef } from 'react';
 import { ArrowRight, Star } from 'lucide-react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { SiteImages } from '../types';
+import { SiteImages, Language } from '../types';
 
 gsap.registerPlugin(ScrollTrigger);
 
 interface AboutProps {
     images: SiteImages['about'];
+    language: Language;
 }
 
-const About: React.FC<AboutProps> = ({ images }) => {
+const About: React.FC<AboutProps> = ({ images, language }) => {
   const container = useRef<HTMLElement>(null);
+
+  const t = {
+    es: {
+      aboutTitle: "Sobre Ashez",
+      line1: "No es solo",
+      line2: "Ropa.",
+      line3: "Es Arte.",
+      quote: "El tejido conecta generaciones y el bordado cuenta historias. En Ashez, cada prenda lleva una parte de nuestra esencia.",
+      desc: "Fundada con la pasión por rescatar técnicas textiles ancestrales, ASHEZ fusiona el diseño contemporáneo con la calidez del trabajo manual. Creemos en la moda lenta, en prendas que duran y en el detalle que hace única a cada pieza bordada o tejida.",
+      workshop: "Taller Creativo",
+      contactBtn: "Contáctanos"
+    },
+    en: {
+      aboutTitle: "About Ashez",
+      line1: "It's not just",
+      line2: "Clothes.",
+      line3: "It's Art.",
+      quote: "Knitting connects generations and embroidery tells stories. At Ashez, every garment carries a part of our essence.",
+      desc: "Founded with a passion for rescuing ancestral textile techniques, ASHEZ fuses contemporary design with the warmth of manual work. We believe in slow fashion, in garments that last, and in the detail that makes every embroidered or knitted piece unique.",
+      workshop: "Creative Workshop",
+      contactBtn: "Contact Us"
+    }
+  }[language];
 
   useLayoutEffect(() => {
     let ctx = gsap.context(() => {
@@ -51,7 +75,7 @@ const About: React.FC<AboutProps> = ({ images }) => {
 
     }, container);
     return () => ctx.revert();
-  }, []);
+  }, [language]);
 
   return (
     <section ref={container} id="about" className="relative overflow-hidden py-24 bg-white">
@@ -66,31 +90,31 @@ const About: React.FC<AboutProps> = ({ images }) => {
           <div className="about-content lg:col-span-7 flex flex-col justify-center">
             <div className="about-line flex items-center space-x-2 mb-6">
               <span className="h-px w-12 bg-primary"></span>
-              <span className="text-xs font-bold tracking-widest uppercase text-primary">Sobre Ashez</span>
+              <span className="text-xs font-bold tracking-widest uppercase text-primary">{t.aboutTitle}</span>
             </div>
             
             <h2 className="font-display text-5xl sm:text-7xl font-black leading-none mb-8 uppercase">
-              <span className="about-line block">No es solo</span>
-              <span className="about-line block text-outline text-gray-300">Ropa.</span>
-              <span className="about-line block text-primary">Es Arte.</span>
+              <span className="about-line block">{t.line1}</span>
+              <span className="about-line block text-outline text-gray-300">{t.line2}</span>
+              <span className="about-line block text-primary">{t.line3}</span>
             </h2>
 
             <div className="about-box relative pl-0 lg:pl-12 mt-8">
               <div className="bg-bg-light p-8 rounded-r-3xl border-l-4 border-primary shadow-lg max-w-xl">
                 <p className="text-xl font-medium mb-6 italic font-display text-secondary">
-                  "{`El tejido conecta generaciones y el bordado cuenta historias. En Ashez, cada prenda lleva una parte de nuestra esencia.`}"
+                  "{t.quote}"
                 </p>
                 <p className="text-text-dim text-sm leading-relaxed mb-8">
-                  Fundada con la pasión por rescatar técnicas textiles ancestrales, ASHEZ fusiona el diseño contemporáneo con la calidez del trabajo manual. Creemos en la moda lenta, en prendas que duran y en el detalle que hace única a cada pieza bordada o tejida.
+                  {t.desc}
                 </p>
                 
                 <div className="flex items-center justify-between">
                   <div className="flex flex-col">
-                    <span className="text-[10px] text-gray-400 uppercase tracking-wider">Taller Creativo</span>
+                    <span className="text-[10px] text-gray-400 uppercase tracking-wider">{t.workshop}</span>
                     <span className="font-bold font-display text-2xl">Bolivia</span>
                   </div>
                   <a href="#contact" className="inline-flex items-center justify-center px-6 py-3 rounded-full text-white bg-secondary hover:bg-primary transition-all duration-300 group">
-                    <span className="text-sm font-bold mr-2">Contáctanos</span>
+                    <span className="text-sm font-bold mr-2">{t.contactBtn}</span>
                     <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
                   </a>
                 </div>

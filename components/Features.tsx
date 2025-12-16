@@ -1,16 +1,36 @@
 import React, { useLayoutEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { SiteImages } from '../types';
+import { SiteImages, Language } from '../types';
 
 gsap.registerPlugin(ScrollTrigger);
 
 interface FeaturesProps {
     images: SiteImages['portfolio'];
+    language: Language;
 }
 
-const Features: React.FC<FeaturesProps> = ({ images }) => {
+const Features: React.FC<FeaturesProps> = ({ images, language }) => {
   const container = useRef<HTMLElement>(null);
+
+  const t = {
+    es: {
+      kitTitle: "KIT DE BORDADO INICIAL",
+      kitDesc: "TU SEÑAL PARA COMENZAR A CREAR",
+      texture: "Texturas que se sienten vivas.",
+      designTitle: "Diseño",
+      designSubtitle: "PERSONALIZADO",
+      designDesc: "Desde bordados intrincados hasta tejidos cálidos. Creamos prendas que reflejan tu estilo con la calidez de lo hecho a mano."
+    },
+    en: {
+      kitTitle: "STARTER EMBROIDERY KIT",
+      kitDesc: "YOUR SIGN TO START CREATING",
+      texture: "Textures that feel alive.",
+      designTitle: "Design",
+      designSubtitle: "CUSTOMIZED",
+      designDesc: "From intricate embroidery to warm knits. We create garments that reflect your style with the warmth of the handmade."
+    }
+  }[language];
 
   useLayoutEffect(() => {
     let ctx = gsap.context(() => {
@@ -69,9 +89,9 @@ const Features: React.FC<FeaturesProps> = ({ images }) => {
           {/* Left Column */}
           <div className="md:col-span-3 flex flex-col justify-between h-full space-y-12">
             <div className="feature-left">
-              <p className="text-sm font-bold uppercase mb-4 text-gray-400 tracking-wider">KIT DE BORDADO INICIAL</p>
+              <p className="text-sm font-bold uppercase mb-4 text-gray-400 tracking-wider">{t.kitTitle}</p>
               <p className="font-medium leading-relaxed text-lg">
-                TU SEÑAL PARA COMENZAR A CREAR
+                {t.kitDesc}
               </p>
             </div>
             
@@ -84,7 +104,7 @@ const Features: React.FC<FeaturesProps> = ({ images }) => {
                 />
               </div>
               <p className="text-xs mt-4 font-medium text-gray-500 text-center md:text-left">
-                Texturas que se sienten vivas.
+                {t.texture}
               </p>
             </div>
           </div>
@@ -121,10 +141,10 @@ const Features: React.FC<FeaturesProps> = ({ images }) => {
             </div>
             
             <div className="feature-right">
-              <p className="text-sm font-bold uppercase mb-4 text-gray-400 tracking-wider">Diseño</p>
-              <h3 className="font-bold mb-2 text-xl">PERSONALIZADO</h3>
+              <p className="text-sm font-bold uppercase mb-4 text-gray-400 tracking-wider">{t.designTitle}</p>
+              <h3 className="font-bold mb-2 text-xl">{t.designSubtitle}</h3>
               <p className="text-sm text-gray-500 leading-relaxed">
-                Desde bordados intrincados hasta tejidos cálidos. Creamos prendas que reflejan tu estilo con la calidez de lo hecho a mano.
+                {t.designDesc}
               </p>
             </div>
           </div>

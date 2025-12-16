@@ -1,6 +1,6 @@
 import React from 'react';
 import { X, Trash2, MessageCircle } from 'lucide-react';
-import { Product } from '../types';
+import { Product, Language } from '../types';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface CartProps {
@@ -8,10 +8,30 @@ interface CartProps {
   onClose: () => void;
   cartItems: Product[];
   removeFromCart: (id: string) => void;
+  language: Language;
 }
 
-const Cart: React.FC<CartProps> = ({ isOpen, onClose, cartItems, removeFromCart }) => {
+const Cart: React.FC<CartProps> = ({ isOpen, onClose, cartItems, removeFromCart, language }) => {
   const total = cartItems.reduce((sum, item) => sum + (item.discountPrice || item.price), 0);
+
+  const t = {
+    es: {
+      title: "Tu Bolsa",
+      empty: "Tu bolsa está vacía.",
+      goShop: "Ir a la tienda",
+      estimatedTotal: "Total Estimado",
+      orderBtn: "Pedir por WhatsApp",
+      redirect: "Serás redirigido a WhatsApp para coordinar el pago y envío con +59176398780"
+    },
+    en: {
+      title: "Your Bag",
+      empty: "Your bag is empty.",
+      goShop: "Go to Shop",
+      estimatedTotal: "Estimated Total",
+      orderBtn: "Order via WhatsApp",
+      redirect: "You will be redirected to WhatsApp to coordinate payment and shipping with +59176398780"
+    }
+  }[language];
 
   const handleCheckout = () => {
     if (cartItems.length === 0) return;
@@ -21,7 +41,11 @@ const Cart: React.FC<CartProps> = ({ isOpen, onClose, cartItems, removeFromCart 
         return `- ${item.name} (${price} Bs.)`;
     }).join('\n');
     
-    const message = `Hola ASHEZ, estoy interesado en comprar los siguientes productos:\n\n${itemList}\n\nTotal: ${total.toFixed(2)} Bs.\n\n¿Podrían indicarme los métodos de pago y envío?`;
+    // Message logic (keep largely Spanish as business is Bolivian, but could be adjusted)
+    const intro = language === 'es' ? "Hola ASHEZ, estoy interesado en comprar:" : "Hello ASHEZ, I'm interested in buying:";
+    const outro = language === 'es' ? "¿Podrían indicarme los métodos de pago y envío?" : "Could you let me know payment and shipping methods?";
+    
+    const message = `${intro}\n\n${itemList}\n\nTotal: ${total.toFixed(2)} Bs.\n\n${outro}`;
     
     const whatsappUrl = `https://wa.me/59176398780?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
@@ -50,7 +74,7 @@ const Cart: React.FC<CartProps> = ({ isOpen, onClose, cartItems, removeFromCart 
           >
             {/* Header */}
             <div className="p-6 flex items-center justify-between border-b border-gray-100">
-              <h2 className="font-display text-2xl uppercase">Tu Bolsa ({cartItems.length})</h2>
+              <h2 className="font-display text-2xl uppercase">{t.title} ({cartItems.length})</h2>
               <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
                 <X size={24} />
               </button>
@@ -63,9 +87,9 @@ const Cart: React.FC<CartProps> = ({ isOpen, onClose, cartItems, removeFromCart 
                   <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center">
                     <MessageCircle size={32} />
                   </div>
-                  <p>Tu bolsa está vacía.</p>
+                  <p>{t.empty}</p>
                   <button onClick={onClose} className="text-primary font-bold hover:underline">
-                    Ir a la tienda
+                    {t.goShop}
                   </button>
                 </div>
               ) : (
@@ -105,7 +129,7 @@ const Cart: React.FC<CartProps> = ({ isOpen, onClose, cartItems, removeFromCart 
             {cartItems.length > 0 && (
               <div className="p-6 border-t border-gray-100 bg-white">
                 <div className="flex justify-between items-center mb-6">
-                  <span className="text-gray-500 font-medium">Total Estimado</span>
+                  <span className="text-gray-500 font-medium">{t.estimatedTotal}</span>
                   <span className="font-display text-3xl font-bold">{total.toFixed(2)} Bs.</span>
                 </div>
                 <button 
@@ -113,10 +137,10 @@ const Cart: React.FC<CartProps> = ({ isOpen, onClose, cartItems, removeFromCart 
                   className="w-full bg-[#25D366] hover:bg-[#128C7E] text-white py-4 rounded-full font-bold uppercase flex items-center justify-center gap-2 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1"
                 >
                   <MessageCircle size={20} />
-                  Pedir por WhatsApp
+                  {t.orderBtn}
                 </button>
                 <p className="text-center text-[10px] text-gray-400 mt-3">
-                  Serás redirigido a WhatsApp para coordinar el pago y envío con +59176398780
+                  {t.redirect}
                 </p>
               </div>
             )}

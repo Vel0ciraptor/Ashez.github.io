@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { ShoppingBag, Settings } from 'lucide-react';
+import { ShoppingBag, Globe } from 'lucide-react';
+import { Language } from '../types';
 
 interface NavbarProps {
   cartCount: number;
   onCartClick: () => void;
   onNavigate: (page: string) => void;
+  language: Language;
+  setLanguage: (lang: Language) => void;
 }
 
-const Navbar: React.FC<NavbarProps> = ({ cartCount, onCartClick, onNavigate }) => {
+const Navbar: React.FC<NavbarProps> = ({ cartCount, onCartClick, onNavigate, language, setLanguage }) => {
   const [isScrolled, setIsScrolled] = useState(false);
 
   useEffect(() => {
@@ -17,6 +20,15 @@ const Navbar: React.FC<NavbarProps> = ({ cartCount, onCartClick, onNavigate }) =
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  const toggleLanguage = () => {
+    setLanguage(language === 'es' ? 'en' : 'es');
+  };
+
+  const texts = {
+    es: { home: 'INICIO', catalog: 'CATÁLOGO' },
+    en: { home: 'HOME', catalog: 'CATALOG' }
+  };
 
   return (
     <nav 
@@ -38,23 +50,24 @@ const Navbar: React.FC<NavbarProps> = ({ cartCount, onCartClick, onNavigate }) =
                 onClick={() => onNavigate('home')} 
                 className="hidden md:block text-sm font-bold text-secondary hover:text-primary"
             >
-                INICIO
+                {texts[language].home}
             </button>
             <button 
                 onClick={() => onNavigate('catalog')} 
                 className="hidden md:block text-sm font-bold text-secondary hover:text-primary"
             >
-                CATÁLOGO
+                {texts[language].catalog}
             </button>
             
             <div className="h-6 w-px bg-gray-300 hidden md:block"></div>
 
             <button 
-                onClick={() => onNavigate('admin')}
-                className="text-gray-400 hover:text-secondary transition-colors"
-                title="Panel Cliente"
+                onClick={toggleLanguage}
+                className="flex items-center gap-1 text-xs font-bold border border-secondary rounded-full px-3 py-1 hover:bg-secondary hover:text-white transition-colors"
+                title="Change Language"
             >
-                <Settings size={18} />
+                <Globe size={14} />
+                {language.toUpperCase()}
             </button>
 
             <button 

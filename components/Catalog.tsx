@@ -1,6 +1,6 @@
 import React, { useLayoutEffect, useRef } from 'react';
 import { Plus, Heart } from 'lucide-react';
-import { Product } from '../types';
+import { Product, Language } from '../types';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
@@ -10,11 +10,27 @@ interface CatalogProps {
   products: Product[];
   addToCart: (product: Product) => void;
   onNavigate: (page: string) => void;
+  language: Language;
 }
 
-const Catalog: React.FC<CatalogProps> = ({ products, addToCart, onNavigate }) => {
+const Catalog: React.FC<CatalogProps> = ({ products, addToCart, onNavigate, language }) => {
   const container = useRef<HTMLElement>(null);
   
+  const t = {
+    es: {
+      title1: "Nuestras",
+      title2: "Creaciones",
+      offer: "Oferta",
+      viewAll: "Ver Todo el Catálogo"
+    },
+    en: {
+      title1: "Our",
+      title2: "Creations",
+      offer: "Sale",
+      viewAll: "View Full Catalog"
+    }
+  }[language];
+
   // Show only first 3 items on the home page preview
   const previewProducts = products.slice(0, 3);
 
@@ -53,7 +69,7 @@ const Catalog: React.FC<CatalogProps> = ({ products, addToCart, onNavigate }) =>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
           <h2 className="catalog-title font-display text-5xl md:text-6xl uppercase tracking-wide">
-            Nuestras <span className="text-primary">Creaciones</span>
+            {t.title1} <span className="text-primary">{t.title2}</span>
           </h2>
         </div>
 
@@ -74,7 +90,7 @@ const Catalog: React.FC<CatalogProps> = ({ products, addToCart, onNavigate }) =>
                 {product.discountPrice && (
                     <div className="absolute top-6 left-6 z-10">
                         <span className="bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
-                            Oferta
+                            {t.offer}
                         </span>
                     </div>
                 )}
@@ -129,7 +145,7 @@ const Catalog: React.FC<CatalogProps> = ({ products, addToCart, onNavigate }) =>
                 onClick={() => onNavigate('catalog')}
                 className="px-8 py-3 bg-transparent border border-secondary rounded-full text-secondary font-bold uppercase hover:bg-secondary hover:text-white transition-all text-sm"
              >
-                Ver Todo el Catálogo
+                {t.viewAll}
              </button>
         </div>
       </div>

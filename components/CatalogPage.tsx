@@ -1,25 +1,43 @@
 import React, { useState, useLayoutEffect, useRef } from 'react';
 import { Plus, Search, ChevronLeft, ChevronRight } from 'lucide-react';
-import { Product } from '../types';
+import { Product, Language } from '../types';
 import gsap from 'gsap';
 
 interface CatalogPageProps {
   products: Product[];
   addToCart: (product: Product) => void;
+  language: Language;
 }
 
-const CatalogPage: React.FC<CatalogPageProps> = ({ products, addToCart }) => {
+const CatalogPage: React.FC<CatalogPageProps> = ({ products, addToCart, language }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Todos');
   const gridRef = useRef<HTMLDivElement>(null);
 
+  const t = {
+    es: {
+      title: "Catálogo",
+      subtitle: "Explora todas nuestras piezas únicas. Desde bordados personalizados hasta tejidos exclusivos.",
+      all: "Todos",
+      searchPlaceholder: "Buscar productos...",
+      noResults: "No se encontraron productos que coincidan con tu búsqueda."
+    },
+    en: {
+      title: "Catalog",
+      subtitle: "Explore all our unique pieces. From custom embroidery to exclusive knits.",
+      all: "All",
+      searchPlaceholder: "Search products...",
+      noResults: "No products found matching your search."
+    }
+  }[language];
+
   // Derive categories from products
-  const categories = ['Todos', ...Array.from(new Set(products.map(p => p.category)))];
+  const categories = [t.all, ...Array.from(new Set(products.map(p => p.category)))];
 
   const filteredProducts = products.filter(product => {
     const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
                           product.description.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = selectedCategory === 'Todos' || product.category === selectedCategory;
+    const matchesCategory = selectedCategory === t.all || product.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
 
@@ -43,8 +61,8 @@ const CatalogPage: React.FC<CatalogPageProps> = ({ products, addToCart }) => {
         
         {/* Header */}
         <div className="mb-12">
-            <h1 className="font-display text-5xl md:text-7xl uppercase text-secondary mb-4">Catálogo</h1>
-            <p className="text-gray-500 max-w-2xl">Explora todas nuestras piezas únicas. Desde bordados personalizados hasta tejidos exclusivos.</p>
+            <h1 className="font-display text-5xl md:text-7xl uppercase text-secondary mb-4">{t.title}</h1>
+            <p className="text-gray-500 max-w-2xl">{t.subtitle}</p>
         </div>
 
         {/* Filters */}
@@ -69,7 +87,7 @@ const CatalogPage: React.FC<CatalogPageProps> = ({ products, addToCart }) => {
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
                 <input 
                     type="text" 
-                    placeholder="Buscar productos..." 
+                    placeholder={t.searchPlaceholder}
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="w-full bg-white pl-10 pr-4 py-2 rounded-full border border-gray-200 focus:outline-none focus:border-primary transition-colors"
@@ -80,13 +98,13 @@ const CatalogPage: React.FC<CatalogPageProps> = ({ products, addToCart }) => {
         {/* Grid */}
         <div ref={gridRef} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
           {filteredProducts.map((product) => (
-             <ProductCard key={product.id} product={product} addToCart={addToCart} />
+             <ProductCard key={product.id} product={product} addToCart={addToCart} language={language} />
           ))}
         </div>
 
         {filteredProducts.length === 0 && (
             <div className="text-center py-24 text-gray-400">
-                <p>No se encontraron productos que coincidan con tu búsqueda.</p>
+                <p>{t.noResults}</p>
             </div>
         )}
       </div>
@@ -94,7 +112,7 @@ const CatalogPage: React.FC<CatalogPageProps> = ({ products, addToCart }) => {
   );
 };
 
-const ProductCard: React.FC<{ product: Product, addToCart: (p: Product) => void }> = ({ product, addToCart }) => {
+const ProductCard: React.FC<{ product: Product, addToCart: (p: Product) => void, language: Language }> = ({ product, addToCart, language }) => {
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
     const nextImage = (e: React.MouseEvent) => {
@@ -116,7 +134,7 @@ const ProductCard: React.FC<{ product: Product, addToCart: (p: Product) => void 
                  {product.discountPrice && (
                     <div className="absolute top-3 left-3 z-10">
                         <span className="bg-red-500 text-white text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-wider shadow-sm">
-                            Oferta
+                            {language === 'es' ? 'Oferta' : 'Sale'}
                         </span>
                     </div>
                 )}
